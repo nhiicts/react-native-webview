@@ -278,6 +278,7 @@ class WebView extends React.Component<WebViewSharedProps, State> {
         dataDetectorTypes={this.props.dataDetectorTypes}
         useSharedProcessPool={this.props.useSharedProcessPool}
         allowsLinkPreview={this.props.allowsLinkPreview}
+        onChangeNavigationState={this._onChangeNavigationState}
         {...nativeConfig.props}
       />
     );
@@ -288,6 +289,12 @@ class WebView extends React.Component<WebViewSharedProps, State> {
         {otherView}
       </View>
     );
+  }
+
+  _onChangeNavigationState = (event: WebViewNavigationEvent) => {
+    if (this.props.onNavigationStateChange) {
+      this.props.onNavigationStateChange(event);
+    }
   }
 
   _getCommands() {

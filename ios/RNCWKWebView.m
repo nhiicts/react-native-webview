@@ -26,6 +26,7 @@ static NSString *const MessageHanderName = @"ReactNative";
 @end
 
 @interface RNCWKWebView () <WKUIDelegate, WKNavigationDelegate, WKScriptMessageHandler, UIScrollViewDelegate, RCTAutoInsetsProtocol>
+@property (nonatomic, copy) RCTDirectEventBlock onChangeNavigationState;
 @property (nonatomic, copy) RCTDirectEventBlock onLoadingStart;
 @property (nonatomic, copy) RCTDirectEventBlock onLoadingFinish;
 @property (nonatomic, copy) RCTDirectEventBlock onLoadingError;
@@ -108,6 +109,8 @@ static NSString *const MessageHanderName = @"ReactNative";
     _webView.scrollView.bounces = _bounces;
     _webView.allowsLinkPreview = _allowsLinkPreview;
     [_webView addObserver:self forKeyPath:@"estimatedProgress" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:nil];
+    [_webView addObserver:self forKeyPath:@"canGoBack" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:nil];
+    [_webView addObserver:self forKeyPath:@"canGoForward" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:nil];
     _webView.allowsBackForwardNavigationGestures = _allowsBackForwardNavigationGestures;
 
     if (_userAgent) {
@@ -151,7 +154,14 @@ static NSString *const MessageHanderName = @"ReactNative";
             [event addEntriesFromDictionary:@{@"progress":[NSNumber numberWithDouble:self.webView.estimatedProgress]}];
             _onLoadingProgress(event);
         }
-    }else{
+    } else if (([keyPath isEqual:@"canGoBack"] || [keyPath isEqual:@"canGoForward"]) && object == self.webView) {
+        NSMutableDictionary<NSString *, id> *event = [self baseEvent];
+        [event addEntriesFromDictionary: @{
+                                           @"url": self.webView.URL.absoluteString,
+                                           @"navigationType": @(WKNavigationTypeBackForward)]
+                                           }];
+        self.onChangeNavigationState(event);
+    } else{
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }
 }
