@@ -280,7 +280,7 @@ class WebView extends React.Component<WebViewSharedProps, State> {
         allowsLinkPreview={this.props.allowsLinkPreview}
         onChangeNavigationState={(event: WebViewNavigationEvent) => {
           if (this.props.onNavigationStateChange) {
-            this.props.onNavigationStateChange(event);
+            this.props.onNavigationStateChange(event.nativeEvent);
           }
         }}
         {...nativeConfig.props}
